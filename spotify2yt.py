@@ -92,10 +92,36 @@ def add_video_to_playlist(youtube, playlist_id, video_id, max_retries=5):
                 raise  # re-raise for unexpected errors
     print(f"Failed to add video {video_id} after {max_retries} retries.")
 
-# ---------- MAIN ----------
+def get_spotify_access_token(client_id: str, client_secret: str) -> str:
+    import base64
+
+    auth_string = f"{client_id}:{client_secret}"
+    auth_bytes = auth_string.encode("utf-8")
+    auth_base64 = base64.b64encode(auth_bytes).decode("utf-8")
+
+    headers = {
+        "Authorization": f"Basic {auth_base64}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    data = {"grant_type": "client_credentials"}
+
+    response = requests.post("https://accounts.spotify.com/api/token", headers=headers, data=data)
+    
+    if response.status_code != 200:
+        raise Exception(f"Failed to get Spotify token: {response.status_code} - {response.text}")
+
+    return response.json()["access_token"]
+
 if __name__ == "__main__":
-    spotify_token = "$token"
-    spotify_playlist_id = "0plEmZPnuHojzoAqdYDqZ6"
+    # Spotify credentials
+    client_id = ""
+    client_secret = ""
+    
+    # Get Spotify token
+    spotify_token = get_spotify_access_token(client_id, client_secret)
+    # print(spotify_token)
+    spotify_playlist_id = "325ytcAirLcUQS8Zse0ay3"
 
     # Step 1: Auth
     youtube = get_authenticated_service()
